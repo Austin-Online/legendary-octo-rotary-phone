@@ -1,23 +1,72 @@
-// Wrap all code that interacts with the DOM in a call to jQuery to ensure that
-// the code isn't run until the browser has finished rendering all the elements
-// in the html.
-$(function () {
-  // TODO: Add a listener for click events on the save button. This code should
-  // use the id in the containing time-block as a key to save the user input in
-  // local storage. HINT: What does `this` reference in the click listener
-  // function? How can DOM traversal be used to get the "hour-x" id of the
-  // time-block containing the button that was clicked? How might the id be
-  // useful when saving the description in local storage?
-  //
-  // TODO: Add code to apply the past, present, or future class to each time
-  // block by comparing the id to the current hour. HINTS: How can the id
-  // attribute of each time-block be used to conditionally add or remove the
-  // past, present, and future classes? How can Day.js be used to get the
-  // current hour in 24-hour time?
-  //
-  // TODO: Add code to get any user input that was saved in localStorage and set
-  // the values of the corresponding textarea elements. HINT: How can the id
-  // attribute of each time-block be used to do this?
-  //
-  // TODO: Add code to display the current date in the header of the page.
+// Global Const
+const timeDisplayEl = $('#currentDay');
+
+// Time Block Elements
+const timeBlocks = {
+  nine: { element: $('#9'), button: $('#button9'), input: $('#input9') },
+  ten: { element: $('#10'), button: $('#button10'), input: $('#input10') },
+  eleven: { element: $('#11'), button: $('#button11'), input: $('#input11') },
+  twelve: { element: $('#12'), button: $('#button12'), input: $('#input12') },
+  one: { element: $('#13'), button: $('#button1'), input: $('#input1') },
+  two: { element: $('#14'), button: $('#button2'), input: $('#input2') },
+  three: { element: $('#15'), button: $('#button3'), input: $('#input3') },
+  four: { element: $('#16'), button: $('#button4'), input: $('#input4') },
+  five: { element: $('#17'), button: $('#button5'), input: $('#input5') }
+};
+
+// Day JS Time
+const now = dayjs().format('HH');
+
+// Displays the time
+function displayTime() {
+  const rightNow = dayjs().format('MMM DD, YYYY [at] HH:mm:ss a');
+  timeDisplayEl.text(rightNow);
+}
+
+setInterval(displayTime, 1000);
+
+displayTime();
+
+// Event listeners
+Object.keys(timeBlocks).forEach(blockKey => {
+  const { button, input } = timeBlocks[blockKey];
+  const storageKey = `${blockKey.replace('Am', ' am').replace('Pm', ' pm')}`;
+
+  button.on('click', function(event) {
+    event.preventDefault();
+    const appt = input.val();
+    localStorage.setItem(storageKey, JSON.stringify(appt));
+  });
+
+  function apptData() {
+    const apptDisplay = JSON.parse(localStorage.getItem(storageKey));
+    if (apptDisplay !== null) {
+      input.text(apptDisplay);
+    }
+  }
+  apptData();
 });
+
+// Data persistence in local storage
+function localData() {
+  Object.values(timeBlocks).forEach(block => block.apptData());
+}
+
+// Past, Present, and Future 
+function workDay() {
+  Object.values(timeBlocks).forEach(({ element }) => {
+    const timeHour = element.attr('id');
+    if (now === timeHour) {
+      element.addClass('present');
+    } else if (now < timeHour) {
+      element.addClass('future');
+    } else if (now > timeHour) {
+      element.addClass('past');
+    }
+  });
+}
+
+// Calls the function that controls the color of the time blocks
+workDay();
+
+localData();
