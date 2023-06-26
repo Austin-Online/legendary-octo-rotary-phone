@@ -37,20 +37,23 @@ Object.keys(timeBlocks).forEach(blockKey => {
     const appt = input.val();
     localStorage.setItem(storageKey, JSON.stringify(appt));
   });
+});
 
-  function apptData() {
+// Data persistence in local storage
+function apptData() {
+  Object.keys(timeBlocks).forEach(blockKey => {
+    const { input } = timeBlocks[blockKey];
+    const storageKey = `${blockKey.replace('Am', ' am').replace('Pm', ' pm')}`;
+
     const apptDisplay = JSON.parse(localStorage.getItem(storageKey));
     if (apptDisplay !== null) {
       input.text(apptDisplay);
     }
-  }
-  apptData();
-});
-
-// Data persistence in local storage
-function localData() {
-  Object.values(timeBlocks).forEach(block => block.apptData());
+  });
 }
+
+// Call the apptData function directly
+apptData();
 
 // Past, Present, and Future 
 function workDay() {
@@ -68,5 +71,3 @@ function workDay() {
 
 // Calls the function that controls the color of the time blocks
 workDay();
-
-localData();
